@@ -1,0 +1,68 @@
+<div class="row" style="padding: 16px;">
+    <form class="form-inline" method="get" action="/">
+        <div class="col">
+            <label for="clubPicker">Club Ids</label>
+            <select id="clubPicker" name="clubIds" class="selectpicker" multiple data-live-search="true" title="">
+                {{#each clubs}}
+                    <option value="{{data}}">{{value}}</option>
+                {{/each}}
+            </select>
+            <small id="clubPickerHelp" class="form-text text-muted">Select multiple</small>
+        </div>
+        <div class="col">
+            <label for="lookBack">Lookback (in seconds)</label>
+            <input type="text" class="form-control" id="lookBack" name="lookBack">
+            <small id="lookbackHelp" class="form-text text-muted">Default is 6 months</small>
+        </div>
+        <div class="col">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+        <div class="col">
+            <button id="clearBtn" class="btn btn-secondary">Clear</button>
+        </div>
+    </form>
+</div>
+<h1 style="margin-left: 16px">Fresh Classifiers</h1>
+<div class="row" style="padding: 16px">
+    {{#each cleanClassifiers}}
+        <div class="col-sm-4">
+            <div class="card" id="{{classifier}}">
+                <div class="image">
+                    <img src="{{{image_file}}}"/>
+                </div>
+                <div class="card-inner">
+                    <div class="header">
+                        <h2>{{name}}</h2>
+                        <h3>{{classifier}}</h3>
+                    </div>
+                    <div class="content">
+                        <p>Rounds: {{rounds}} <br> Scoring: {{scoring}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {{/each}}
+    <a id="resetAll" href="/?lookBack=" style="display: none"></a>
+</div>
+
+<script type="application/javascript">
+    $(document).ready(function () {
+        $('#lookBack').val('{{{lookBack}}}');
+        $('#clubPicker').on('change', function() {
+            var selectedClubs = $('#clubPicker').val();
+            $('#clubPickerHelp').text('Selected clubs: ' + selectedClubs.length);
+        });
+        $('.card').on('click', function () {
+            window.open("https://uspsa.org/resources/classifiers/" + $(this).attr('id') + ".pdf")
+        })
+        var selectedClubsJson = {{{selectedClubs}}};
+        for(var i = 0; i < selectedClubsJson.length; i++) {
+            $('#clubPicker option[value="'+selectedClubsJson[i]+'"]').prop('selected', true);
+        }
+        var selectedClubs = $('#clubPicker').val();
+        $('#clubPickerHelp').text('Selected clubs: ' + selectedClubs.length);
+        $('#clearBtn').on('click', function () {
+            $('#resetAll').click();
+        })
+    });
+</script>
