@@ -34,8 +34,8 @@ app.get('/', async function (req, res) {
         if (typeof clubCodes === 'string') {
             clubCodes = [clubCodes];
         }
-        // let cleanClassifiers = await getCleanClassifiers(clubCodes, lookBack);
-        let cleanClassifiers = {};
+        let cleanClassifiers = await getCleanClassifiers(clubCodes, lookBack);
+        // let cleanClassifiers = {};
         res.render('main', {
             layout: 'index',
             cleanClassifiers: cleanClassifiers,
