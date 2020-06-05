@@ -1,0 +1,25 @@
+# Welcome to serverless. Read the docs
+# https://serverless.com/framework/docs/
+
+# Serverless.yml is the configuration the CLI
+# uses to deploy your code to your provider of choice
+
+# The `service` block is the name of the service
+service: lambda
+
+# The `provider` block defines where your service will be deployed
+provider:
+  name: aws
+  runtime: nodejs10.x
+  region: us-west-2
+
+# The `functions` block defines what code to deploy
+functions:
+  getFreshClassifiers:
+    handler: handler.getFreshClassifiers
+    # The `events` block defines how to trigger the handler.helloWorld code
+    events:
+      - http:
+          path: getFreshClassifiers
+          method: get
+          cors: true
