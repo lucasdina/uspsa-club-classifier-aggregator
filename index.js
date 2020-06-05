@@ -22,6 +22,7 @@ app.get('/', async function (req, res) {
     if (!lookBack) {
         lookBack = (60 * 60 * 24 * 30 * 6);
     }
+    console.log('lookback: ', lookBack)
     if (!clubCodes || clubCodes.length === 0) {
         res.render('main', {
             layout: 'index',
@@ -51,7 +52,7 @@ app.listen(port, () => console.log(`App listening to port ${port}`));
 let getCleanClassifiers = async function (clubCodes, lookBack) {
     return new Promise((resolve, reject) => {
         classifierMap = {};
-        let currentDate = Math.round((new Date()).getTime() / 1000);
+        let currentDate = Math.round((new Date()).getTime());
         let promises = [];
         clubCodes.forEach(code => {
             promises.push(getClubClassifiers(code));
@@ -60,9 +61,10 @@ let getCleanClassifiers = async function (clubCodes, lookBack) {
             let usedClassifiers = [];
             let cleanClassifiers = [];
             for (let i in classifierMap) {
+                console.log(i);
                 classifierMap[i].forEach(item => {
-                    let dateDiff = (currentDate - item.date);
-                    if (dateDiff < lookBack && !usedClassifiers.includes(item.id)) {
+                    let dateDiff = (parseInt(currentDate) - parseInt(item.date));
+                    if (dateDiff <= parseInt(lookBack) && !usedClassifiers.includes(item.id)) {
                         usedClassifiers.push(item.id);
                     }
                 })
@@ -97,7 +99,6 @@ let getClubClassifiers = async function (clubCode) {
                 });
             });
             classifierMap[clubCode] = objectsToPush;
-            console.log('total run classifiers: ', objectsToPush.length);
             resolve({});
         });
     });

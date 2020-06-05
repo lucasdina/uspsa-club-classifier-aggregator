@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>USPSA Club Classifier Aggregator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    <link rel="stylesheet" type="text/css" href="./style.css"/>
+    <link rel="stylesheet" type="text/css" href="./BsMultiSelect.css"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="js/club.js" type="application/javascript"></script>
+    <script src="js/classifier.js" type="application/javascript"></script>
+
+</head>
+<body>
+<div class="row" style="padding: 16px;">
+    <form class="form-inline" method="get" action="">
+        <div class="col">
+            <label for="clubPicker">Club Ids</label>
+            <select id="clubPicker" name="clubIds" class="selectpicker" multiple data-live-search="true" title="">
+            </select>
+            <small id="clubPickerHelp" class="form-text text-muted">Select multiple</small>
+        </div>
+        <div class="col">
+            <label for="lookBack">Lookback</label>
+            <select id="lookBack" name="lookBack" class="selectpicker" title="">
+                <option value="2592000000">1 Month</option>
+                <option value="7776000000">3 Months</option>
+                <option value="15552000000">6 Months</option>
+                <option value="31104000000">1 Year</option>
+            </select>
+            <small id="lookbackHelp" class="form-text text-muted">Default is 6 months</small>
+        </div>
+        <div class="col">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+    <div class="col" style="margin-top: 24px">
+        <button id="clearBtn" class="btn btn-secondary">Clear</button>
+    </div>
+</div>
+<h1 style="margin-left: 16px">Fresh Classifiers</h1>
+<div class="row" id="classifiersContainer" style="padding: 16px">
+</div>
+<a id="resetAll" href="/?lookBack=" style="display: none"></a>
+
+<script type="application/javascript">
+    const urlParams = new URLSearchParams(window.location.search);
+    var clubIds = urlParams.getAll('clubIds');
+    var lookBack = urlParams.get('lookBack');
+
+    populateClubsAndLookBack();
+    fetchCleanClassifiers();
+
+    $(document).ready(function () {
+        var lookBackElement = $('#lookBack');
+        var clubPicker = $('#clubPicker');
+        clubPicker.on('change', function () {
+            var selectedClubs = $('#clubPicker').val();
+            $('#clubPickerHelp').text('Selected clubs: ' + selectedClubs.length);
+        });
+        for (var i = 0; i < clubIds.length; i++) {
+            $('#clubPicker option[value="' + clubIds[i] + '"]').prop('selected', true);
+        }
+        $('.card').on('click', function () {
+            console.log('navigating to: ', "https://uspsa.org/resources/classifiers/" + $(this).attr('id') + ".pdf");
+            window.open("https://uspsa.org/resources/classifiers/" + $(this).attr('id') + ".pdf")
+        });
+        var selectedClubs = clubPicker.val();
+        $('#clubPickerHelp').text('Selected clubs: ' + selectedClubs.length);
+        $('#clearBtn').on('click', function () {
+            window.location = window.location.href.split("?")[0];
+        })
+    });
+
+    function fetchCleanClassifiers() {
+        if (clubIds && lookBack) {
+            console.log('filtering club ids: ', clubIds);
+            console.log('lookback: ', lookBack);
+            $.get("https://5886emmmb3.execute-api.us-west-2.amazonaws.com/dev/getFreshClassifiers" + window.location.search)
+                .done(function (response) {
+                    console.log('total classifiers: ', CLASSIFIERS.length);
+                    console.log('clean classifiers: ', response.length);
+                    renderClassifierList(response);
+                })
+                .fail(function () {
+                    console.log("error");
+                });
+        }
+    }
+
+    function renderClassifierList(data) {
+        var classifiersContainer = $('#classifiersContainer');
+        for (var i = 0; i < data.length; i++) {
+            classifiersContainer.append(getClassifierElement(data[i]));
+        }
+    }
+
+    function populateClubsAndLookBack() {
+        var clubPicker = document.getElementById('clubPicker');
+        for (var i = 0; i < CLUBS.length; i++) {
+            var option = document.createElement('option');
+            option.text = CLUBS[i].value;
+            option.value = CLUBS[i].data;
+            clubPicker.appendChild(option);
+        }
+        if(lookBack) {
+            $('#lookBack option[value="' + lookBack + '"]').prop('selected', true);
+        } else {
+            $('#lookBack option[value="15552000"]').prop('selected', true);
+        }
+    }
+
+    function getClassifierElement(classifier) {
+        return "        <div class=\"col-sm-4\">\n" +
+            "            <div class=\"card\" id=\"" + classifier.classifier + "\">\n" +
+            "                <div class=\"image\">\n" +
+            "                    <img src=\"" + classifier.image_file + "\"/>\n" +
+            "                </div>\n" +
+            "                <div class=\"card-inner\">\n" +
+            "                    <div class=\"header\">\n" +
+            "                        <h2>" + classifier.name + "</h2>\n" +
+            "                        <h3>" + classifier.classifier + "</h3>\n" +
+            "                    </div>\n" +
+            "                    <div class=\"content\">\n" +
+            "                        <p>Rounds: " + classifier.rounds + " <br> Scoring: " + classifier.scoring + "</p>\n" +
+            "                    </div>\n" +
+            "                </div>\n" +
+            "            </div>\n" +
+            "        </div>"
+    }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+
+</body>
+</html>
+

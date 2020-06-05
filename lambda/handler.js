@@ -11,25 +11,19 @@ module.exports.getFreshClassifiers = async function (event, context, callback) {
     headers: {
       'Access-Control-Allow-Origin': '*', // Required for CORS support to work
       'Content-Type': 'application/json'
-    },
-    body: {},
+    }
   };
   // let clubCodes = ['ID07', 'ID08', 'ID03'];
   let clubCodes = event['multiValueQueryStringParameters']['clubIds'];
-  let lookBack = event['multiValueQueryStringParameters']['lookBack'][0];
-  if (!lookBack) {
-    lookBack = (60 * 60 * 24 * 30 * 6);
-  }
+  let lookBack = event['multiValueQueryStringParameters']['lookBack'];
   if (!clubCodes || clubCodes.length === 0) {
-    response.body = {};
+    response.body = JSON.stringify({});
   } else {
     if (typeof clubCodes === 'string') {
       clubCodes = [clubCodes];
     }
-    response.body = await getCleanClassifiers(clubCodes, lookBack);
+    response.body = JSON.stringify(await getCleanClassifiers(clubCodes, lookBack));
   }
-
-  response.body = JSON.stringify(response.body);
 
   callback(null, response);
 };
@@ -37,7 +31,7 @@ module.exports.getFreshClassifiers = async function (event, context, callback) {
 let getCleanClassifiers = async function (clubCodes, lookBack) {
   return new Promise((resolve, reject) => {
     classifierMap = {};
-    let currentDate = Math.round((new Date()).getTime() / 1000);
+    let currentDate = Math.round((new Date()).getTime());
     let promises = [];
     clubCodes.forEach(code => {
       promises.push(getClubClassifiers(code));

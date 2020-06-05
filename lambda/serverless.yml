@@ -1,3 +1,5 @@
+org: lukeadina
+app: lambda-app
 # Welcome to serverless. Read the docs
 # https://serverless.com/framework/docs/
 
