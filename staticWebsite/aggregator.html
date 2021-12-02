@@ -17,14 +17,37 @@
 
 </head>
 <body>
+<div class="row" style="padding: 16px;">
+    <form class="form-inline" method="get" action="">
+        <div class="col">
+            <label for="clubPicker">Club Ids</label>
+            <select id="clubPicker" name="clubIds" class="selectpicker" multiple data-live-search="true" title="">
+            </select>
+            <small id="clubPickerHelp" class="form-text text-muted">Select multiple</small>
+        </div>
+        <div class="col">
+            <label for="lookBack">Lookback</label>
+            <select id="lookBack" name="lookBack" class="selectpicker" title="">
+                <option value="2592000000">1 Month</option>
+                <option value="7776000000">3 Months</option>
+                <option value="15552000000">6 Months</option>
+                <option value="31104000000">1 Year</option>
+            </select>
+            <small id="lookbackHelp" class="form-text text-muted">Default is 6 months</small>
+        </div>
+        <div class="col">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+        <div class="col" style="">
+            <button id="clearBtn" class="btn btn-secondary">Clear</button>
+        </div>
+    </form>
 
-<div class="d-flex justify-content-center align-items-center" style="height:100px;">
-    <a href="aggregator.html"><button class="btn btn-primary">Classifier Aggregator</button></a>
 </div>
-
-<div class="d-flex justify-content-center align-items-center" style="height:100px;">
-    <a href="match-analysis.html"><button class="btn btn-primary">Match Analysis</button></a>
+<h1 style="margin-left: 16px">Fresh Classifiers</h1>
+<div class="row" id="classifiersContainer" style="padding: 16px">
 </div>
+<a id="resetAll" href="/?lookBack=" style="display: none"></a>
 
 <script type="application/javascript">
     const urlParams = new URLSearchParams(window.location.search);
